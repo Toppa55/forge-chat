@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080b12" />
+  <meta name="description" content="Private AI chat, live code workspace, restore points, and iPhone dictation." />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="preconnect" href="https://api.openai.com" />
+  <title>Forge Chat</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Forge Chat home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <strong>Forge</strong>
+        <span class="workspace-label">personal workspace</span>
+      </div>
+
+      <div class="topbar-actions">
+        <label class="model-picker">
+          <span>Model</span>
+          <select id="modelSelect" aria-label="Choose AI model">
+            <option value="gpt-6-sol">GPT-6 Sol · balanced</option>
+            <option value="gpt-6-astra">GPT-6 Astra · strongest</option>
+            <option value="gpt-6-luna">GPT-6 Luna · fastest</option>
+          </select>
+        </label>
+        <button class="usage-pill" id="usageButton" type="button" aria-label="Open usage details">
+          <span class="pulse-dot"></span>
+          <span><b id="usageAmount">$0.0000</b> used</span>
+        </button>
+        <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings" title="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V21H10v-.05A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3v-4h.05A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06L7.06 4.2l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3h4v.05A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21v4h-.05A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="rail" aria-label="Primary navigation">
+        <button class="rail-button active" data-view="chat" aria-label="Chat" title="Chat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a4 4 0 0 1-4 4H8l-4 2v-6a4 4 0 0 1 0-8 4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8Z"/></svg>
+        </button>
+        <button class="rail-button" data-view="code" aria-label="Code studio" title="Code studio">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 9-3 3 3 3M16 9l3 3-3 3M14 5l-4 14"/></svg>
+        </button>
+        <button class="rail-button" data-view="history" aria-label="Restore points" title="Restore points">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>
+        </button>
+        <div class="rail-spacer"></div>
+        <button class="avatar" id="avatarButton" type="button" title="Connection">ME</button>
+      </aside>
+
+      <section class="chat-panel" id="chatPanel" aria-label="AI chat">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">ACTIVE THREAD</p>
+            <h1>Build room</h1>
+          </div>
+          <button class="text-button" id="newChatButton" type="button">New chat</button>
+        </div>
+
+        <div class="messages" id="messages" aria-live="polite">
+          <article class="message assistant-message">
+            <div class="message-avatar">F</div>
+            <div class="message-body">
+              <div class="message-meta"><strong>Forge</strong><span>ready</span></div>
+              <p>I’m ready to plan, write, and improve your projects. Open Code Studio to edit beside me, or start with a request below.</p>
+              <div class="starter-prompts">
+                <button type="button" data-prompt="Build a clean personal dashboard with three useful cards.">Build a dashboard</button>
+                <button type="button" data-prompt="Review my current code and suggest the safest next improvement.">Review my code</button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <form class="composer" id="chatForm">
+          <div class="context-strip">
+            <button type="button" id="contextToggle" class="context-chip active" aria-pressed="true">
+              <span class="mini-dot"></span> Workspace context on
+            </button>
+            <span id="contextStatus">3 files synced</span>
+          </div>
+          <div class="composer-box">
+            <textarea id="promptInput" rows="1" placeholder="Ask Forge anything…" aria-label="Message Forge"></textarea>
+            <div class="composer-actions">
+              <button class="record-button" id="recordButton" type="button" aria-label="Dictate message" title="Speech to text">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg>
+                <span id="recordLabel">Dictate</span>
+              </button>
+              <button class="send-button" id="sendButton" type="submit" aria-label="Send message">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 7-7 7 7M12 19V5"/></svg>
+              </button>
+            </div>
+          </div>
+          <p class="composer-note">Enter sends · Shift+Enter adds a line</p>
+        </form>
+      </section>
+
+      <section class="studio-panel" id="studioPanel" aria-label="Code studio">
+        <div class="studio-toolbar">
+          <div class="studio-title">
+            <span class="window-controls" aria-hidden="true"><i></i><i></i><i></i></span>
+            <strong>Code Studio</strong>
+            <span id="saveState">All changes saved locally</span>
+          </div>
+          <div class="studio-actions">
+            <button class="secondary-button" id="checkpointButton" type="button">Save point</button>
+            <button class="primary-button" id="improveButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg>
+              Improve with AI
+            </button>
+          </div>
+        </div>
+
+        <div class="ide-grid">
+          <aside class="file-explorer">
+            <div class="explorer-label"><span>EXPLORER</span><button id="addFileButton" type="button" title="Add file">+</button></div>
+            <div id="fileList" class="file-list"></div>
+            <div class="restore-card">
+              <span class="restore-icon">↺</span>
+              <div><strong>Safe editing</strong><p>Every AI change creates a restore point first.</p></div>
+            </div>
+          </aside>
+
+          <div class="editor-column">
+            <div class="editor-tabs" id="editorTabs"></div>
+            <div class="editor-wrap">
+              <pre id="lineNumbers" aria-hidden="true">1</pre>
+              <textarea id="codeEditor" spellcheck="false" aria-label="Code editor"></textarea>
+            </div>
+            <div class="editor-status">
+              <span id="cursorStatus">Ln 1, Col 1</span>
+              <span>UTF-8</span>
+              <span id="languageStatus">HTML</span>
+            </div>
+          </div>
+
+          <div class="preview-column">
+            <div class="preview-bar">
+              <div><span class="live-dot"></span><strong>Live preview</strong></div>
+              <button id="refreshPreview" class="icon-button small" type="button" aria-label="Refresh preview">↻</button>
+            </div>
+            <iframe id="previewFrame" title="Live preview" sandbox="allow-scripts"></iframe>
+            <div class="preview-foot">Updates as you type</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <button class="active" data-view="chat"><span>◌</span>Chat</button>
+      <button data-view="code"><span>&lt;/&gt;</span>Code</button>
+      <button data-view="history"><span>↺</span>Restore</button>
+    </nav>
+  </div>
+
+  <dialog id="settingsDialog" class="modal">
+    <form method="dialog" class="modal-card" id="settingsForm">
+      <div class="modal-heading">
+        <div><p class="eyebrow">CONNECTION</p><h2>API & budget</h2></div>
+        <button value="cancel" class="icon-button" aria-label="Close settings">×</button>
+      </div>
+      <p class="modal-intro">Your keys stay in this browser tab and are cleared when the tab closes. They are sent only to OpenAI.</p>
+      <label class="field-label">OpenAI API key
+        <div class="secret-field"><input id="apiKeyInput" type="password" autocomplete="off" placeholder="sk-…" /><button id="showKeyButton" type="button">Show</button></div>
+      </label>
+      <label class="field-label">Monthly app budget (USD)
+        <input id="budgetInput" type="number" min="0" step="1" value="20" />
+      </label>
+      <details>
+        <summary>Optional exact organization usage</summary>
+        <p class="details-copy">An Admin API key can read organization costs. Without it, Forge shows exact token use and an estimated cost for this browser.</p>
+        <label class="field-label">Admin API key
+          <input id="adminKeyInput" type="password" autocomplete="off" placeholder="sk-admin-…" />
+        </label>
+      </details>
+      <div class="connection-test" id="connectionStatus"><span></span>Not connected</div>
+      <div class="modal-actions">
+        <button value="cancel" class="secondary-button">Cancel</button>
+        <button id="saveSettingsButton" value="default" class="primary-button">Save & test</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="usageDialog" class="modal">
+    <div class="modal-card usage-card">
+      <div class="modal-heading"><div><p class="eyebrow">THIS BROWSER</p><h2>Usage</h2></div><button class="icon-button" data-close="usageDialog">×</button></div>
+      <div class="usage-hero"><span>Estimated remaining</span><strong id="remainingAmount">$20.00</strong><div class="usage-track"><i id="usageBar"></i></div></div>
+      <div class="metric-grid">
+        <div><span>Estimated used</span><strong id="usedAmount">$0.0000</strong></div>
+        <div><span>Total tokens</span><strong id="tokenAmount">0</strong></div>
+        <div><span>Input</span><strong id="inputTokens">0</strong></div>
+        <div><span>Output</span><strong id="outputTokens">0</strong></div>
+      </div>
+      <p class="fine-print" id="usageSource">Estimated from API response token counts and current standard model rates. Your OpenAI billing balance may differ.</p>
+    </div>
+  </dialog>
+
+  <dialog id="restoreDialog" class="modal wide-modal">
+    <div class="modal-card">
+      <div class="modal-heading"><div><p class="eyebrow">VERSION SAFETY</p><h2>Restore points</h2></div><button class="icon-button" data-close="restoreDialog">×</button></div>
+      <div id="checkpointList" class="checkpoint-list"></div>
+    </div>
+  </dialog>
+
+  <dialog id="improveDialog" class="modal">
+    <form method="dialog" class="modal-card" id="improveForm">
+      <div class="modal-heading"><div><p class="eyebrow">SELF-IMPROVE</p><h2>Describe the upgrade</h2></div><button value="cancel" class="icon-button">×</button></div>
+      <p class="modal-intro">Forge will review every workspace file, propose complete replacements, and save a restore point before applying anything.</p>
+      <label class="field-label">What should improve?
+        <textarea id="improvePrompt" rows="5" placeholder="Example: Make the dashboard clearer on mobile and add a dark mode toggle."></textarea>
+      </label>
+      <div class="modal-actions"><button value="cancel" class="secondary-button">Cancel</button><button id="runImproveButton" value="default" class="primary-button">Create upgrade</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

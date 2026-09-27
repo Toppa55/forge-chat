@@ -1,0 +1,9 @@
+{
+  "name": "Forge Chat",
+  "short_name": "Forge",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080b12",
+  "theme_color": "#080b12",
+  "description": "A private AI chat and live code workspace."
+}
